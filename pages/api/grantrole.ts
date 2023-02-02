@@ -1,5 +1,7 @@
-import { useClient, useAuth } from '@meshsdk/core';
-import { unstable_getServerSession } from "next-auth/next";
+// import { useClient, useAuth } from '@meshsdk/core';
+import { getServerSession } from "next-auth/next";
+import useClient from "next-auth"
+import useAuth from "next-auth"
 import { authOptions } from "./auth/[...nextauth]";
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -9,7 +11,7 @@ export default async function grantRole(req: NextApiRequest, res: NextApiRespons
     const { loginPayload } = JSON.parse(req.body);
 
     // Get the Next Auth session so we can use the user ID as part of the discord API request
-    const session = await unstable_getServerSession(req, res, authOptions)
+    const session = await getServerSession(req, res, authOptions)
 
     if (!session) {
         res.status(401).json({ error: "Not logged in" });
