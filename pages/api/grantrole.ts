@@ -1,7 +1,9 @@
-// import { useClient, useAuth } from '@meshsdk/core';
+import MeshClient  from '@meshsdk/core';
+// import {useClient} from '@meshsdk/core'
+// import useAuth from "@meshsdk/core"
 import { getServerSession } from "next-auth/next";
-import useClient from "next-auth"
-import useAuth from "next-auth"
+// import {useAuth} from "next-auth"
+// import useAuth from "next-auth"
 import { authOptions } from "./auth/[...nextauth]";
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -18,12 +20,14 @@ export default async function grantRole(req: NextApiRequest, res: NextApiRespons
         return;
     }
 
-    const auth = useAuth();
-    const client = useClient();
+   
+    const client: any = new MeshClient();
     // Authenticate login payload
-    const domain = "example.com";
+    // const domain = "http://localhost";
     // Verify the login payload is real and valid
-    const verifiedWalletAddress = auth.verify(domain, loginPayload);
+    const wallet = await client.getUsedAddress()
+    const verifiedWalletAddress = await wallet.signData(wallet, 'mesh')
+    // const verifiedWalletAddress = auth.verify(domain, loginPayload);
 
     // If the login payload is not valid, return an error
     if (!verifiedWalletAddress) {
@@ -33,7 +37,10 @@ export default async function grantRole(req: NextApiRequest, res: NextApiRespons
 
     // Check if this user owns an NFT
     const policyId = "ec9cf0f7a70dd8ebf825772a85f22ed70ec14dec0f76c4e4b5b0eff7"
-    const assets = await client.request("GET", `/api/assets/${policyId}/${verifiedWalletAddress}`);
+
+    const NFTs = await wallet.getAssets()
+    const assets = NFTs.filter((nft: any) => nft.policyId === policyId);
+    // const assets = await client.request("GET", `/api/assets/${policyId}/${verifiedWalletAddress}`);
     if (assets.length) {
         // Make a request to the Discord API to get the servers this user is a part of
         const discordServerId = "1049415758343577731";
